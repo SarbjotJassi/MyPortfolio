@@ -1,65 +1,40 @@
-/* ====== Typing animation for name ====== */
+// Typing-like effect for name (simple, non-blocking)
 const typedNameEl = document.getElementById('typed-name');
 const nameText = "Sarbjot Jassi";
-let idx = 0;
-
-function typeName() {
-  if (idx <= nameText.length) {
-    typedNameEl.innerHTML = `<span class="cursor">${nameText.slice(0, idx)}</span>`;
-    idx++;
-    setTimeout(typeName, 90);
-  } else {
-    // after typing complete, remove cursor
-    typedNameEl.innerHTML = nameText;
-  }
+let i = 0;
+function typeName(){
+  if(!typedNameEl) return;
+  if(i <= nameText.length){
+    typedNameEl.innerText = nameText.slice(0, i);
+    i++;
+    setTimeout(typeName, 80);
+  } else { typedNameEl.innerText = nameText; }
 }
 document.addEventListener('DOMContentLoaded', typeName);
 
-/* ====== Intersection observer for reveal animations ====== */
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
+// Intersection Observer for reveal animations
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting) e.target.classList.add('visible');
   });
-}, { threshold: 0.2 });
+},{threshold:0.2});
+document.querySelectorAll('.project-card, .skill, .photo-card').forEach(el=>observer.observe(el));
 
-document.querySelectorAll('.section, .project-card, .skill').forEach(el => {
-  observer.observe(el);
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',(e)=>{
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target){ e.preventDefault(); target.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
 });
 
-/* ====== Theme Toggle (dark / light) ====== */
+// Theme toggle + persist
 const themeBtn = document.getElementById('themeToggle');
 const root = document.documentElement;
-const savedTheme = localStorage.getItem('theme');
-
-if (savedTheme === 'light') {
-  document.documentElement.classList.add('light');
-  themeBtn.textContent = '☀️';
-}
-
-themeBtn.addEventListener('click', () => {
-  const isLight = document.documentElement.classList.toggle('light');
+const saved = localStorage.getItem('theme');
+if(saved === 'light') root.classList.add('light'), themeBtn.textContent = '☀️';
+themeBtn && themeBtn.addEventListener('click', ()=>{
+  const isLight = root.classList.toggle('light');
   themeBtn.textContent = isLight ? '☀️' : '🌙';
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
 });
-
-/* ====== Smooth scroll for anchor links ====== */
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function(e) {
-    const target = document.querySelector(this.getAttribute('href'));
-    if (!target) return;
-    e.preventDefault();
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-});
-
-/* ====== Small UX: download CV button confirms ====== */
-const downloadBtn = document.getElementById('downloadCv');
-if (downloadBtn) {
-  downloadBtn.addEventListener('click', (e) => {
-    // Let default download happen. Optionally show a quick toast — for simplicity, we console.log
-    console.log('CV download started');
-  });
-}
-
